@@ -64,6 +64,20 @@ yandex-music-downloader --token "<Токен>" --quality 1 --lyrics-format lrc -
 yandex-music-downloader --token "<Токен>" --url "https://music.yandex.ru/album/11644078/track/6705392"
 ```
 
+### Скачать плейлист по короткой ссылке (`/playlists/<uuid>`) в наилучшем качестве и сохранить в пользовательскую папку
+```
+yandex-music-downloader --token "<Токен>" --quality 2 --skip-existing --url "https://music.yandex.ru/playlists/d3659a2f-c17e-aa59-863e-a60207e49259" --dir "C:\Users\Public\Music"
+```
+
+> Примечание: `--quality 2` запрашивает lossless (FLAC), но если конкретный трек недоступен в lossless, будет загружен в максимально доступном качестве.
+
+### Скачать все треки в одну папку (без сортировки по исполнителю/альбому)
+```
+yandex-music-downloader --token "<Токен>" --url "<URL>" --dir "C:\Users\Public\Music" --path-pattern "#title [#track-id]"
+```
+
+> Примечание: рекомендуется добавлять `#track-id` в имя файла, чтобы избежать перезаписи треков с одинаковым названием.
+
 ## Использование
 ```
 usage: yandex-music-downloader [-h] [--quality <Качество>] [--skip-existing]

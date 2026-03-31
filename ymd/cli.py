@@ -3,6 +3,7 @@ import argparse
 import itertools
 import logging
 import re
+import sys
 import time
 import typing
 from argparse import ArgumentTypeError
@@ -21,6 +22,9 @@ TRACK_RE = re.compile(r"track/(\d+)")
 ALBUM_RE = re.compile(r"album/(\d+)$")
 ARTIST_RE = re.compile(r"artist/(\d+)$")
 PLAYLIST_RE = re.compile(r"([\w\-._@]+)/playlists/(\d+)$")
+PLAYLIST_SHORT_UUID_RE = re.compile(
+    r"/playlists/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/?$"
+)
 
 FETCH_PAGE_SIZE = 10
 
@@ -63,6 +67,13 @@ def lyrics_format_arg(astr: str) -> core.LyricsFormat:
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if stream and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except (OSError, ValueError, AttributeError):
+                pass
+
     parser = argparse.ArgumentParser(
         description="Загрузчик музыки с сервиса Яндекс.Музыка",
         formatter_class=argparse.RawTextHelpFormatter,
@@ -227,6 +238,8 @@ def main():
             args.track_id = match.group(1)
         elif match := PLAYLIST_RE.search(path):
             args.playlist_id = match.group(1) + "/" + match.group(2)
+        elif match := PLAYLIST_SHORT_UUID_RE.search(path):
+            setattr(args, "playlist_uuid", match.group(1))
         else:
             print("Параметер url указан в неверном формате")
             return 1
@@ -237,6 +250,20 @@ def main():
         max_try_count=args.tries,
         retry_delay=args.retry_delay,
     )
+    if getattr(args, "playlist_uuid", None):
+        brief = client.request.get(f"{client.base_url}/playlist/{args.playlist_uuid}")
+        if not brief.get("available", True):
+            print("Плейлист недоступен")
+            return 1
+        uid = brief.get("uid")
+        if uid is None and brief.get("owner"):
+            uid = brief["owner"].get("uid")
+        kind = brief.get("kind")
+        if uid is None or kind is None:
+            print("Не удалось разрешить плейлист по короткой ссылке")
+            return 1
+        args.playlist_id = f"{uid}/{kind}"
+
     result_tracks: Iterable[Track]
 
     def album_tracks_gen(album_ids: Iterable[Union[int, str]]) -> Generator[Track]:
