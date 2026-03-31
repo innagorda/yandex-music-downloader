@@ -49,34 +49,17 @@ https://yandex-music.readthedocs.io/en/main/token.html
 ## Примеры использования
 Во всех примерах замените `<Токен>` на ваш токен.
 
-### Скачать все треки [Arctic Monkeys](https://music.yandex.ru/artist/208167) в наилучшем качестве
-```
-yandex-music-downloader --token "<Токен>" --quality 2 --url "https://music.yandex.ru/artist/208167"
-```
 
-### Скачать альбом [Nevermind](https://music.yandex.ru/album/294912) в высоком качестве, загружая тексты песен в формате LRC (с временными метками)
-```
-yandex-music-downloader --token "<Токен>" --quality 1 --lyrics-format lrc --url "https://music.yandex.ru/album/294912"
-```
-
-### Скачать трек [Seven Nation Army](https://music.yandex.ru/album/11644078/track/6705392)
-```
-yandex-music-downloader --token "<Токен>" --url "https://music.yandex.ru/album/11644078/track/6705392"
-```
-
-### Скачать плейлист по короткой ссылке (`/playlists/<uuid>`) в наилучшем качестве и сохранить в пользовательскую папку
-```
-yandex-music-downloader --token "<Токен>" --quality 2 --skip-existing --url "https://music.yandex.ru/playlists/d3659a2f-c17e-aa59-863e-a60207e49259" --dir "C:\Users\Public\Music"
-```
-
-> Примечание: `--quality 2` запрашивает lossless (FLAC), но если конкретный трек недоступен в lossless, будет загружен в максимально доступном качестве.
-
-### Скачать все треки в одну папку (без сортировки по исполнителю/альбому)
-```
-yandex-music-downloader --token "<Токен>" --url "<URL>" --dir "C:\Users\Public\Music" --path-pattern "#title [#track-id]"
-```
 
 > Примечание: рекомендуется добавлять `#track-id` в имя файла, чтобы избежать перезаписи треков с одинаковым названием.
+
+### Плейлист в одну папку: имя файла «Исполнитель - Название трека»
+
+```
+yandex-music-downloader --token "<Токен>" --quality 2 --url "https://music.yandex.ru/playlists/d3659a2f-c17e-aa59-863e-a60207e49259" --dir "E:\Музыка\like" --path-pattern "#track-artist - #title"
+```
+
+> Если у нескольких треков совпадут исполнитель и название, последний перезапишет предыдущий. Тогда используйте, например, `--path-pattern "#track-artist - #title [#track-id]"`.
 
 ## Использование
 ```
